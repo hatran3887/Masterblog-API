@@ -13,9 +13,22 @@ POSTS = [
 @app.route('/api/posts', methods=['GET'])
 def get_posts():
     """
-    Posts route to show all posts
+    Posts route to show all posts or sorted posts
     """
-    return jsonify(POSTS)
+    sort = request.args.get("sort")
+    direction = request.args.get("direction")
+
+    if not sort or not direction:
+        return jsonify(POSTS)
+
+    if sort not in ("title", "content") or direction not in ("asc", "desc"):
+        return jsonify({'message': 'the values for sort should be title or content'
+                                   'and the value for direction should be asc or desc'}), 400
+
+    if sort == "title":
+        return jsonify(sorted(POSTS, key=lambda x: x['title'], reverse=direction == "desc"))
+    else:
+        return jsonify(sorted(POSTS, key=lambda x: x['content'], reverse=direction == "desc"))
 
 
 @app.route('/api/posts', methods=['POST'])
